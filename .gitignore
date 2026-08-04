@@ -10,3 +10,6 @@ __pycache__/
 *.pyc
 .env
 .venv/
+/results/
+!/results/class_metrics.json
+!/results/metrics_report.txt
