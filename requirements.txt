@@ -1,0 +1,31 @@
+# Recommended pinned dependencies (example set). Replace versions with your
+# tested, known-good pins if you have them. On macOS (Apple Silicon) prefer
+# `tensorflow-macos` + `tensorflow-metal` instead of the Linux `tensorflow` wheel.
+
+# Core - TensorFlow (macOS) and helpers
+tensorflow-macos==2.12.0
+tensorflow-metal==0.6.0
+
+# Numerical & data
+numpy==1.24.4
+pandas==2.1.2
+
+# Visualization
+matplotlib==3.7.1
+seaborn==0.12.2
+
+# ML utilities
+scikit-learn==1.2.2
+h5py==3.8.0
+
+# Image handling
+opencv-python==4.7.0.72
+Pillow==9.5.0
+
+# Utilities
+kaggle==1.5.13
+streamlit==1.24.0
+watchdog==3.0.0
+
+# Optional (for on-device runtime on Raspberry Pi; install on the Pi, not on macOS dev)
+# tflite-runtime==2.12.0
