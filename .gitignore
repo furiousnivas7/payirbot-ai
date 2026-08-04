@@ -1,0 +1,12 @@
+# Data and model artifacts
+/data/
+/models/
+/dashboard_data/payirbot.db
+/results/
+*.h5
+*.tflite
+*.pb
+__pycache__/
+*.pyc
+.env
+.venv/
