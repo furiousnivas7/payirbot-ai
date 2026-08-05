@@ -19,7 +19,7 @@ install: venv
 
 install-direct: venv
 	@env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY -u all_proxy -u ALL_PROXY -u DOCKER_HTTP_PROXY -u DOCKER_HTTPS_PROXY -u ftp_proxy -u FTP_PROXY -u grpc_proxy -u GRPC_PROXY -u RSYNC_PROXY bash -lc '. .venv/bin/activate && python -m pip install --upgrade pip setuptools wheel'
-	@env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY -u all_proxy -u ALL_PROXY -u DOCKER_HTTP_PROXY -u DOCKER_HTTPS_PROXY -u ftp_proxy -u FTP_PROXY -u grpc_proxy -u GRPC_PROXY -u RSYNC_PROXY bash -lc '. .venv/bin/activate && SSL_CERT_FILE="$$(python -c "import certifi; print(certifi.where())" 2>/dev/null || true)" python -m pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt'
+	@env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY -u all_proxy -u ALL_PROXY -u DOCKER_HTTP_PROXY -u DOCKER_HTTPS_PROXY -u ftp_proxy -u FTP_PROXY -u grpc_proxy -u GRPC_PROXY -u RSYNC_PROXY bash -lc '. .venv/bin/activate && SSL_CERT_FILE="$$(python -c "import pip._vendor.certifi as c; print(c.where())" 2>/dev/null || true)" python -m pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt'
 
 install-proxy: venv
 	@if [ -z "$(PROXY)" ]; then echo "Please set PROXY=http://host:port"; exit 1; fi
