@@ -36,6 +36,24 @@ make venv
 make install
 ```
 
+If you need offline setup, create a wheelhouse from a machine with internet access:
+
+```bash
+python3 -m venv .wheelenv
+. .wheelenv/bin/activate
+python -m pip install --upgrade pip
+python -m pip wheel -r requirements.txt -w wheelhouse
+```
+
+Then copy the `wheelhouse/` directory to the target machine and install from it:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install --no-index --find-links=wheelhouse -r requirements.txt
+```
+
 3. Download the dataset (Kaggle)
 
 ```bash
@@ -92,6 +110,8 @@ Key folders and files:
 - If `pip install` fails due to network or proxy restrictions, configure
 	`HTTPS_PROXY` / `HTTP_PROXY` or use a local wheel cache. The repository can
 	also be prepared via `make venv` and `make install` once connectivity is fixed.
+- For an offline install, generate a `wheelhouse/` directory from a connected
+	machine and install using `--no-index --find-links=wheelhouse`.
 
 ## Contributing
 - Create feature branches, keep commits focused (this repo prefers small
