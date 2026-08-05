@@ -19,7 +19,7 @@ install: venv
 
 install-direct: venv
 	. .venv/bin/activate && env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY -u all_proxy -u ALL_PROXY \
-	  python -m pip install --no-cache-dir -r requirements.txt
+	  python -m pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
 
 install-proxy: venv
 	@if [ -z "$(PROXY)" ]; then echo "Please set PROXY=http://host:port"; exit 1; fi

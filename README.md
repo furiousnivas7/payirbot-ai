@@ -52,6 +52,12 @@ use:
 make install-direct
 ```
 
+If `make install-direct` still fails due to SSL certificate verification, try:
+
+```bash
+SSL_CERT_FILE=/path/to/ca-bundle.crt make install-direct
+```
+
 If you need offline setup, create a wheelhouse from a machine with internet access:
 
 ```bash
