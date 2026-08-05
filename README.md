@@ -42,6 +42,12 @@ If you are behind a proxy, use:
 make install-proxy PROXY=http://<proxy-host>:<proxy-port>
 ```
 
+If the proxy uses self-signed certificates, you may also need to set:
+
+```bash
+export PIP_TRUSTED_HOST="pypi.org files.pythonhosted.org"
+```
+
 If you need offline setup, create a wheelhouse from a machine with internet access:
 
 ```bash
