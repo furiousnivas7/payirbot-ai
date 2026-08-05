@@ -36,6 +36,12 @@ make venv
 make install
 ```
 
+If you are behind a proxy, use:
+
+```bash
+make install-proxy PROXY=http://<proxy-host>:<proxy-port>
+```
+
 If you need offline setup, create a wheelhouse from a machine with internet access:
 
 ```bash
@@ -110,6 +116,7 @@ Key folders and files:
 - If `pip install` fails due to network or proxy restrictions, configure
 	`HTTPS_PROXY` / `HTTP_PROXY` or use a local wheel cache. The repository can
 	also be prepared via `make venv` and `make install` once connectivity is fixed.
+- If you are behind a proxy, run `make install-proxy PROXY=http://<proxy-host>:<proxy-port>`.
 - For an offline install, generate a `wheelhouse/` directory from a connected
 	machine and install using `--no-index --find-links=wheelhouse`.
 

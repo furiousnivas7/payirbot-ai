@@ -15,6 +15,10 @@ venv:
 install: venv
 	. .venv/bin/activate && python -m pip install --no-cache-dir -r requirements.txt
 
+install-proxy: venv
+	@if [ -z "$(PROXY)" ]; then echo "Please set PROXY=http://host:port"; exit 1; fi
+	. .venv/bin/activate && env http_proxy=$(PROXY) https_proxy=$(PROXY) HTTP_PROXY=$(PROXY) HTTPS_PROXY=$(PROXY) python -m pip install --no-cache-dir -r requirements.txt
+
 wheelhouse:
 	python3 -m venv .wheelenv
 	. .wheelenv/bin/activate && python -m pip install --upgrade pip setuptools wheel
