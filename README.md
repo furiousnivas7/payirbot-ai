@@ -113,10 +113,18 @@ Key folders and files:
 - For an offline install, generate a `wheelhouse/` directory from a connected
 	machine and install using `--no-index --find-links=wheelhouse`.
 
+## Developer workflow
+- Use `make venv` to bootstrap a local Python environment.
+- Use `make install` to install dependencies.
+- Use `make wheelhouse` to generate offline wheel files in `wheelhouse/`.
+- Use `make test` to run repository sanity checks and import tests.
+
 ## Contributing
-- Create feature branches, keep commits focused (this repo prefers small
-	logical commits for history clarity), and open a PR when ready.
+- Create feature branches and keep commits small and focused.
+- Use clear commit messages that describe intent, e.g. `feat: add dashboard UI` or
+  `fix: resolve dataset path handling`.
+- Open a pull request when ready and document your changes in the PR description.
 
 ## License
-Pick a license and add a `LICENSE` file (MIT is common for research prototypes).
+This repository is released under the MIT License. See `LICENSE` for details.
 

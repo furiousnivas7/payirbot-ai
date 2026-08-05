@@ -19,9 +19,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Validate import paths
-        run: |
-          python -m py_compile src/config.py src/data_loader.py src/evaluate.py src/train.py src/prepare_data.py src/convert_to_tflite.py src/dashboard.py
-      - name: Check Python source imports
+      - name: Validate Python source syntax
         run: |
           python -m py_compile src/config.py src/data_loader.py src/evaluate.py src/train.py src/prepare_data.py src/convert_to_tflite.py src/dashboard.py

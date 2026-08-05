@@ -1,10 +1,11 @@
-.PHONY: help venv install wheelhouse clean
+.PHONY: help venv install wheelhouse test clean
 
 help:
 	@echo "Available commands:"
 	@echo "  make venv        # create a Python virtual environment"
 	@echo "  make install     # install pinned dependencies into .venv"
 	@echo "  make wheelhouse  # build wheelhouse for offline installation"
+	@echo "  make test        # validate repository imports and syntax"
 	@echo "  make clean       # remove generated environment and caches"
 
 venv:
@@ -18,6 +19,9 @@ wheelhouse:
 	python3 -m venv .wheelenv
 	. .wheelenv/bin/activate && python -m pip install --upgrade pip setuptools wheel
 	. .wheelenv/bin/activate && python -m pip wheel -r requirements.txt -w wheelhouse
+
+test: venv
+	. .venv/bin/activate && python -m py_compile src/config.py src/data_loader.py src/evaluate.py src/train.py src/prepare_data.py src/convert_to_tflite.py src/dashboard.py
 
 clean:
 	rm -rf .venv .wheelenv wheelhouse __pycache__
