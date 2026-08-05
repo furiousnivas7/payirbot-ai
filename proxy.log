@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/Users/nivashsharma/payirbot-training/simple_proxy.py", line 128, in <module>
+    with ThreadedTCPServer((args.host, args.port), ProxyHandler) as server:
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/socketserver.py", line 452, in __init__
+    self.server_bind()
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/socketserver.py", line 466, in server_bind
+    self.socket.bind(self.server_address)
+PermissionError: [Errno 1] Operation not permitted
