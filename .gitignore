@@ -1,7 +1,7 @@
 # Data and model artifacts
 /data/
 /models/
-/dashboard_data/payirbot.db
+/dashboard_data/
 /results/
 *.h5
 *.tflite
@@ -10,6 +10,5 @@ __pycache__/
 *.pyc
 .env
 .venv/
-/results/
 !/results/class_metrics.json
 !/results/metrics_report.txt

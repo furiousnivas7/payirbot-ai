@@ -1,11 +1,17 @@
-# PayirBot AI
+# PayirBot Training
 
-MobileNetV2-based plant disease classifier, training pipeline, and Streamlit
-inspection dashboard for PayirBot — a low-cost autonomous crop inspection robot.
+**Repository Name:** `payirbot-training`
 
-This repository contains the data preparation, model training, evaluation,
-TFLite export, and a Streamlit dashboard used to simulate on-robot inference
-and inspection history.
+**Description:** Transfer learning pipeline and TensorFlow Lite deployment for
+plant disease classification focused on the PayirBot field inspection robot.
+
+PayirBot Training is a plant disease classification repository that uses
+MobileNetV2 transfer learning to train, evaluate, and deploy a crop inspection
+model for the PayirBot autonomous field robot.
+
+This repository contains data preparation, model training, evaluation,
+TensorFlow Lite conversion, and a Streamlit dashboard used to simulate
+on-robot inference and inspection history.
 
 ## Quick start
 
@@ -76,6 +82,8 @@ Key folders and files:
 	If you want to version small result artifacts like `results/class_metrics.json`,
 	whitelist them in `.gitignore` instead of committing whole folders.
 - For macOS Apple Silicon, prefer `tensorflow-macos` + `tensorflow-metal`.
+- If `pip install` fails due to network or proxy restrictions, use a local
+	wheel cache or configure `HTTPS_PROXY` / `HTTP_PROXY` before retrying.
 
 ## Contributing
 - Create feature branches, keep commits focused (this repo prefers small
