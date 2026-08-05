@@ -29,6 +29,13 @@ python -m pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
 ```
 
+Alternatively, use the provided helper commands:
+
+```bash
+make venv
+make install
+```
+
 3. Download the dataset (Kaggle)
 
 ```bash
@@ -82,8 +89,9 @@ Key folders and files:
 	If you want to version small result artifacts like `results/class_metrics.json`,
 	whitelist them in `.gitignore` instead of committing whole folders.
 - For macOS Apple Silicon, prefer `tensorflow-macos` + `tensorflow-metal`.
-- If `pip install` fails due to network or proxy restrictions, use a local
-	wheel cache or configure `HTTPS_PROXY` / `HTTP_PROXY` before retrying.
+- If `pip install` fails due to network or proxy restrictions, configure
+	`HTTPS_PROXY` / `HTTP_PROXY` or use a local wheel cache. The repository can
+	also be prepared via `make venv` and `make install` once connectivity is fixed.
 
 ## Contributing
 - Create feature branches, keep commits focused (this repo prefers small
