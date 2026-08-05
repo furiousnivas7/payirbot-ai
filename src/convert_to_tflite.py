@@ -45,7 +45,7 @@ def convert_to_tflite():
         shutil.rmtree(SAVEDMODEL_EXPORT_DIR)
 
     print(f"Exporting clean SavedModel to {SAVEDMODEL_EXPORT_DIR}...")
-    model.export(SAVEDMODEL_EXPORT_DIR)
+    tf.saved_model.save(model, SAVEDMODEL_EXPORT_DIR)
 
     print("Converting SavedModel to TensorFlow Lite (with dynamic range quantization)...")
     converter = tf.lite.TFLiteConverter.from_saved_model(SAVEDMODEL_EXPORT_DIR)
