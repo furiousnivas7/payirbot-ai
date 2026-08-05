@@ -21,6 +21,7 @@ h5py==3.8.0
 # Image handling
 opencv-python==4.7.0.72
 Pillow==9.5.0
+certifi==2024.6.0
 
 # Utilities
 kaggle==1.5.13

@@ -55,7 +55,13 @@ make install-direct
 If `make install-direct` still fails due to SSL certificate verification, try:
 
 ```bash
-SSL_CERT_FILE=/path/to/ca-bundle.crt make install-direct
+SSL_CERT_FILE="$(python3 -c 'import certifi; print(certifi.where())')" make install-direct
+```
+
+If your default Python installation does not have `certifi`, install it in a working environment or use a known CA bundle path. For example:
+
+```bash
+SSL_CERT_FILE=/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/certifi/cacert.pem make install-direct
 ```
 
 If you need offline setup, create a wheelhouse from a machine with internet access:

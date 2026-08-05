@@ -19,6 +19,7 @@ install: venv
 
 install-direct: venv
 	. .venv/bin/activate && env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY -u all_proxy -u ALL_PROXY \
+	  SSL_CERT_FILE="$$(python3 -c 'import certifi; print(certifi.where())' 2>/dev/null || true)" \
 	  python -m pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
 
 install-proxy: venv
@@ -26,6 +27,7 @@ install-proxy: venv
 	. .venv/bin/activate && env \
 	  http_proxy=$(PROXY) https_proxy=$(PROXY) HTTP_PROXY=$(PROXY) HTTPS_PROXY=$(PROXY) \
 	  PIP_TRUSTED_HOST="pypi.org files.pythonhosted.org" \
+	  SSL_CERT_FILE="$$(python3 -c 'import certifi; print(certifi.where())' 2>/dev/null || true)" \
 	  python -m pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
 
 wheelhouse:
