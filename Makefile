@@ -12,18 +12,22 @@ help:
 
 venv:
 	python3 -m venv .venv
-	. .venv/bin/activate && python -m pip install --upgrade pip setuptools wheel
 
 install: venv
+	. .venv/bin/activate && python -m pip install --upgrade pip setuptools wheel
 	. .venv/bin/activate && python -m pip install --no-cache-dir -r requirements.txt
 
 install-direct: venv
-	. .venv/bin/activate && env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY -u all_proxy -u ALL_PROXY \
-	  SSL_CERT_FILE="$$(python3 -c 'import certifi; print(certifi.where())' 2>/dev/null || true)" \
-	  python -m pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
+	@env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY -u all_proxy -u ALL_PROXY bash -lc '. .venv/bin/activate && python -m pip install --upgrade pip setuptools wheel'
+	@env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY -u all_proxy -u ALL_PROXY bash -lc '. .venv/bin/activate && SSL_CERT_FILE="$$(python -c "import certifi; print(certifi.where())" 2>/dev/null || true)" python -m pip install --no-cache-dir --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt'
 
 install-proxy: venv
 	@if [ -z "$(PROXY)" ]; then echo "Please set PROXY=http://host:port"; exit 1; fi
+	. .venv/bin/activate && env \
+	  http_proxy=$(PROXY) https_proxy=$(PROXY) HTTP_PROXY=$(PROXY) HTTPS_PROXY=$(PROXY) \
+	  PIP_TRUSTED_HOST="pypi.org files.pythonhosted.org" \
+	  SSL_CERT_FILE="$$(python3 -c 'import certifi; print(certifi.where())' 2>/dev/null || true)" \
+	  python -m pip install --upgrade pip setuptools wheel
 	. .venv/bin/activate && env \
 	  http_proxy=$(PROXY) https_proxy=$(PROXY) HTTP_PROXY=$(PROXY) HTTPS_PROXY=$(PROXY) \
 	  PIP_TRUSTED_HOST="pypi.org files.pythonhosted.org" \
