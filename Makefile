@@ -2,11 +2,12 @@
 
 help:
 	@echo "Available commands:"
-	@echo "  make venv        # create a Python virtual environment"
-	@echo "  make install     # install pinned dependencies into .venv"
-	@echo "  make wheelhouse  # build wheelhouse for offline installation"
-	@echo "  make test        # validate repository imports and syntax"
-	@echo "  make clean       # remove generated environment and caches"
+	@echo "  make venv           # create a Python virtual environment"
+	@echo "  make install        # install pinned dependencies into .venv"
+	@echo "  make install-proxy  # install dependencies through a proxy"
+	@echo "  make wheelhouse     # build wheelhouse for offline installation"
+	@echo "  make test           # validate repository imports and syntax"
+	@echo "  make clean          # remove generated environment and caches"
 
 venv:
 	python3 -m venv .venv
