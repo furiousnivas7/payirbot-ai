@@ -42,10 +42,14 @@ If you are behind a proxy, use:
 make install-proxy PROXY=http://<proxy-host>:<proxy-port>
 ```
 
-If the proxy uses self-signed certificates, you may also need to set:
+If the proxy uses self-signed certificates, the Makefile already passes
+`--trusted-host` for PyPI hosts.
+
+If you want to ignore proxy environment variables and use a direct connection,
+use:
 
 ```bash
-export PIP_TRUSTED_HOST="pypi.org files.pythonhosted.org"
+make install-direct
 ```
 
 If you need offline setup, create a wheelhouse from a machine with internet access:
