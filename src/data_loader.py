@@ -17,6 +17,8 @@ from config import (
 )
 
 AUTOTUNE = tf.data.AUTOTUNE
+NUM_PARALLEL_CALLS = 1
+PREFETCH_SIZE = 1
 
 
 # ─────────────────────────────────────────────
@@ -70,19 +72,19 @@ def get_datasets():
     class_names = train_ds.class_names  # alphabetical order, matches label indices
 
     train_ds = train_ds.map(
-        lambda x, y: _preprocess(x, y, augment=True), num_parallel_calls=AUTOTUNE
+        lambda x, y: _preprocess(x, y, augment=True), num_parallel_calls=NUM_PARALLEL_CALLS
     )
     val_ds = val_ds.map(
-        lambda x, y: _preprocess(x, y, augment=False), num_parallel_calls=AUTOTUNE
+        lambda x, y: _preprocess(x, y, augment=False), num_parallel_calls=NUM_PARALLEL_CALLS
     )
     test_ds = test_ds.map(
-        lambda x, y: _preprocess(x, y, augment=False), num_parallel_calls=AUTOTUNE
+        lambda x, y: _preprocess(x, y, augment=False), num_parallel_calls=NUM_PARALLEL_CALLS
     )
 
-    # Prefetch for performance - overlaps data loading with model execution
-    train_ds = train_ds.prefetch(AUTOTUNE)
-    val_ds = val_ds.prefetch(AUTOTUNE)
-    test_ds = test_ds.prefetch(AUTOTUNE)
+    # Prefetch a small fixed buffer to reduce memory/thread issues on macOS
+    train_ds = train_ds.prefetch(PREFETCH_SIZE)
+    val_ds = val_ds.prefetch(PREFETCH_SIZE)
+    test_ds = test_ds.prefetch(PREFETCH_SIZE)
 
     return train_ds, val_ds, test_ds, class_names
 

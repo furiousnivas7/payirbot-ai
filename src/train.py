@@ -13,9 +13,33 @@ Run:
     python src/train.py
 """
 
+import argparse
 import os
+
+# Project root can differ from current working directory when the script is
+# invoked from another location. Use the script's parent directory.
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# macOS sandbox and multiprocessing can cause TF/Matplotlib crashes if default
+# cache/config dirs are not writable. Use local writable project directories.
+os.environ["MPLCONFIGDIR"] = os.path.join(PROJECT_ROOT, ".mplconfig")
+os.makedirs(os.environ["MPLCONFIGDIR"], exist_ok=True)
+os.environ["KERAS_HOME"] = os.path.join(PROJECT_ROOT, ".keras")
+os.makedirs(os.environ["KERAS_HOME"], exist_ok=True)
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+os.environ["TF_NUM_INTEROP_THREADS"] = "1"
+os.environ["TF_NUM_INTRAOP_THREADS"] = "1"
+os.environ["TF_DETERMINISTIC_OPS"] = "1"
+os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+
 import matplotlib.pyplot as plt
 import tensorflow as tf
+
+# Set a deterministic random seed so dropout and augmented ops behave
+# properly under TF_DETERMINISTIC_OPS.
+tf.random.set_seed(123)
 
 from config import (
     STAGE1_EPOCHS,
@@ -95,7 +119,37 @@ def plot_history(history_dict):
     print(f"Saved training curves to {out_path}")
 
 
-def main():
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Train the PayirBot MobileNetV2 disease classifier."
+    )
+    parser.add_argument(
+        "--stage1-epochs",
+        type=int,
+        default=STAGE1_EPOCHS,
+        help="Number of epochs for stage 1 head training",
+    )
+    parser.add_argument(
+        "--stage2-epochs",
+        type=int,
+        default=STAGE2_EPOCHS,
+        help="Number of epochs for stage 2 fine-tuning",
+    )
+    parser.add_argument(
+        "--fine-tune-at",
+        type=int,
+        default=FINE_TUNE_AT_LAYER,
+        help="Layer index to start fine-tuning from",
+    )
+    parser.add_argument(
+        "--disable-stage2",
+        action="store_true",
+        help="Skip stage 2 fine-tuning",
+    )
+    return parser.parse_args()
+
+
+def main(args):
     print("Loading datasets...")
     train_ds, val_ds, test_ds, class_names = get_datasets()
     print(f"Loaded {len(class_names)} classes.\n")
@@ -117,36 +171,41 @@ def main():
     history_stage1 = model.fit(
         train_ds,
         validation_data=val_ds,
-        epochs=STAGE1_EPOCHS,
+        epochs=args.stage1_epochs,
         callbacks=get_callbacks("stage1_best.h5"),
     )
 
     # ── Stage 2: unfreeze top layers, fine-tune at low LR ──
-    print("\n" + "=" * 50)
-    print(f"STAGE 2: Fine-tuning from layer {FINE_TUNE_AT_LAYER} onward")
-    print("=" * 50)
+    if not args.disable_stage2 and args.stage2_epochs > 0:
+        print("\n" + "=" * 50)
+        print(f"STAGE 2: Fine-tuning from layer {args.fine_tune_at} onward")
+        print("=" * 50)
 
-    set_fine_tune_layers(base_model, FINE_TUNE_AT_LAYER)
+        set_fine_tune_layers(base_model, args.fine_tune_at)
 
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate=STAGE2_LEARNING_RATE),
-        loss="categorical_crossentropy",
-        metrics=["accuracy"],
-    )
+        model.compile(
+            optimizer=tf.keras.optimizers.Adam(learning_rate=STAGE2_LEARNING_RATE),
+            loss="categorical_crossentropy",
+            metrics=["accuracy"],
+        )
 
-    history_stage2 = model.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=STAGE2_EPOCHS,
-        callbacks=get_callbacks("stage2_best.h5"),
-    )
+        history_stage2 = model.fit(
+            train_ds,
+            validation_data=val_ds,
+            epochs=args.stage2_epochs,
+            callbacks=get_callbacks("stage2_best.h5"),
+        )
+
+        merged_history = merge_histories(history_stage1, history_stage2)
+    else:
+        print("\nStage 2 fine-tuning skipped.")
+        merged_history = history_stage1.history
 
     # ── Save final model + training curves ──
     os.makedirs(os.path.dirname(FINAL_MODEL_PATH), exist_ok=True)
     model.save(FINAL_MODEL_PATH)
     print(f"\nFinal model saved to {FINAL_MODEL_PATH}")
 
-    merged_history = merge_histories(history_stage1, history_stage2)
     plot_history(merged_history)
 
     # ── Quick test set evaluation ──
@@ -158,4 +217,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    main(args)
