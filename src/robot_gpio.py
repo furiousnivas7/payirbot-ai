@@ -18,6 +18,14 @@ physical pin 17. Physical pin = position on the 40-pin header.
     SERVO 90        25         22             100 ms pulse
     GND             -          6              common ground with ESP32
 
+ESP32 side of each wire: FORWARD->GPIO4, REVERSE->GPIO5, STOP->GPIO13,
+SERVO CW->GPIO14, SERVO CCW->GPIO16, SERVO 90->GPIO17.
+
+Use from another program (functions, no keyboard, no object to manage):
+
+    from robot_gpio import send_forward, send_stop, servo_center
+    send_forward()
+
 Only ONE Python process may own these pins. Do not run the dashboard and
 robot_keyboard.py at the same time.
 
@@ -29,6 +37,8 @@ Safety rules enforced here:
 """
 
 import atexit
+import signal
+import sys
 import threading
 import time
 
@@ -148,3 +158,66 @@ class RobotGPIO:
                     pin.close()
                 except Exception:
                     pass
+
+
+# ─────────────────────────────────────────────
+# Function API (lazy singleton)
+# ─────────────────────────────────────────────
+# The pins are claimed on the first call, not on import, so importing this
+# module has no side effects. Ctrl+C is handled by atexit/close(); SIGTERM
+# (kill, systemd) is handled too, but only when first called from the main
+# thread (Python only allows signal handlers there).
+
+_robot = None
+_robot_lock = threading.Lock()
+
+
+def _get_robot():
+    global _robot
+    with _robot_lock:
+        if _robot is None:
+            _robot = RobotGPIO()
+            if threading.current_thread() is threading.main_thread():
+                signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+        return _robot
+
+
+def send_forward():
+    """100 ms pulse on GPIO17 -> ESP32 switches to FORWARD."""
+    _get_robot().forward()
+
+
+def send_reverse():
+    """100 ms pulse on GPIO27 -> ESP32 switches to REVERSE."""
+    _get_robot().reverse()
+
+
+def send_stop():
+    """100 ms pulse on GPIO22 -> ESP32 stops both motors."""
+    _get_robot().stop()
+
+
+def servo_clockwise():
+    """GPIO23 HIGH until servo_stop() / servo_counter_clockwise()."""
+    _get_robot().servo_cw_start()
+
+
+def servo_counter_clockwise():
+    """GPIO24 HIGH until servo_stop() / servo_clockwise()."""
+    _get_robot().servo_ccw_start()
+
+
+def servo_stop():
+    """GPIO23 and GPIO24 LOW."""
+    _get_robot().servo_stop()
+
+
+def servo_center():
+    """100 ms pulse on GPIO25 -> ESP32 moves the camera servo to 90 degrees."""
+    _get_robot().servo_90()
+
+
+def close():
+    """Set all outputs LOW and release the pins (also runs at exit)."""
+    if _robot is not None:
+        _robot.close()

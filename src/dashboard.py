@@ -25,7 +25,8 @@ try:
     from tflite_runtime.interpreter import Interpreter
 except ImportError:
     try:
-        from tensorflow.lite import Interpreter
+        import tensorflow as tf
+        Interpreter = tf.lite.Interpreter
     except ImportError:
         Interpreter = None
 
@@ -39,6 +40,7 @@ try:
 except Exception:   # gpiozero missing (e.g. on a Mac)
     RobotGPIO = None
 
+from inspection import make_command_sender, record_inspection, scan_plant
 from config import (
     TFLITE_MODEL_PATH,
     CLASS_NAMES,
@@ -64,6 +66,10 @@ CLASS_METRICS_JSON_PATH = os.path.join(RESULTS_DIR, "class_metrics.json")
 
 CAMERA_INDEX = 0
 CAMERA_WARMUP_FRAMES = 5   # first webcam frames are often dark/blurry
+
+# Below this softmax confidence the result is shown as "uncertain" and not saved.
+# Note: this does not detect non-leaf images; a wrong image can still score high.
+MIN_CONFIDENCE = 0.70
 
 
 st.set_page_config(page_title="PayirBot 2.0 Dashboard", page_icon="🌱", layout="wide")
@@ -122,25 +128,7 @@ def get_robot():
         return None
 
 
-def send_esp32_command(command: str) -> bool:
-    """
-    STOP   -> 100 ms pulse on GPIO22
-    RESUME -> 100 ms FORWARD pulse on GPIO17 (the ESP32 keeps the motion state)
-    Returns False if GPIO is not available.
-    """
-    robot = get_robot()
-    if robot is None:
-        return False
-    try:
-        if command == "STOP":
-            robot.stop()
-        elif command == "RESUME":
-            robot.forward()
-        else:
-            return False
-        return True
-    except Exception:
-        return False
+send_esp32_command = make_command_sender(get_robot)
 
 
 # ============================================================
@@ -233,32 +221,39 @@ def predict(interpreter, image: Image.Image):
     return CLASS_NAMES[index], float(output[index])
 
 
-def format_disease_name(raw_label: str) -> str:
-    """Tomato___Early_blight -> Tomato - Early blight"""
-    parts = raw_label.split("___")
-    if len(parts) == 2:
-        crop, disease = parts
-        return f"{crop} - {disease.replace('_', ' ')}"
-    return raw_label.replace("_", " ")
-
-
 # ============================================================
 # INSPECTION
 # ============================================================
 
 def run_inspection(image: Image.Image):
-    """Predict, save image + DB record, and render the result."""
+    """
+    Predict, save image + DB record, and render the result.
+    Returns True if the result was accepted, False if it was uncertain.
+    """
     with st.spinner("Analyzing..."):
-        label, confidence = predict(load_interpreter(), image)
+        result = record_inspection(
+            image,
+            lambda img: predict(load_interpreter(), img),
+            MIN_CONFIDENCE,
+            IMAGES_DIR,
+            get_next_plant_number,
+            save_inspection,
+        )
 
-        disease_name = format_disease_name(label)
-        is_healthy = "healthy" in label.lower()
-        plant_number = get_next_plant_number()
+    label, confidence = result.label, result.confidence
 
-        image_save_path = os.path.join(IMAGES_DIR, f"plant_{plant_number}.jpg")
-        image.convert("RGB").save(image_save_path)
+    if not result.accepted:
+        st.warning("### ⚠️ Uncertain result")
+        st.metric("Model confidence", f"{confidence * 100:.1f}%")
+        st.write(
+            "Please reposition the camera and capture the leaf again. "
+            f"(Results below {MIN_CONFIDENCE * 100:.0f}% are not saved.)"
+        )
+        return False
 
-        save_inspection(plant_number, disease_name, confidence, image_save_path)
+    disease_name = result.disease_name
+    is_healthy = result.is_healthy
+    plant_number = result.plant_number
 
     st.success("Inspection complete!")
 
@@ -295,6 +290,8 @@ def run_inspection(image: Image.Image):
             "No historical reliability data found for this class. "
             "Run `python src/evaluate.py` to generate it."
         )
+
+    return True
 
 
 # ============================================================
@@ -338,17 +335,25 @@ if c_stop.button("⛔ STOP ROBOT", use_container_width=True):
         st.error("Robot GPIO unavailable")
 
 if c_scan.button("📷 SCAN PLANT", type="primary", use_container_width=True):
-    send_esp32_command("STOP")
-    st.info("Robot stopped. Capturing image...")
-    try:
-        captured = capture_from_camera()
+    def show_and_inspect(captured):
         st.image(captured, caption="Captured plant image")
-        run_inspection(captured)
-    except Exception as e:
-        st.error(f"Inspection failed: {e}")
-    finally:
-        send_esp32_command("RESUME")
+        return run_inspection(captured)
+
+    st.info("Stopping robot and capturing image...")
+
+    # Only moves on after a good result; otherwise the robot stays stopped so
+    # the operator can press SCAN PLANT again (or RESUME ROBOT to skip).
+    resumed = scan_plant(
+        send_esp32_command,
+        capture_from_camera,
+        show_and_inspect,
+        on_error=lambda e: st.error(f"Inspection failed: {e}"),
+    )
+
+    if resumed:
         st.info("Robot resumed.")
+    else:
+        st.warning("Robot stays STOPPED. Press SCAN PLANT to retake, or RESUME ROBOT to skip.")
 
 st.divider()
 
