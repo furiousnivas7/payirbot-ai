@@ -1,0 +1,10 @@
+# Raspberry Pi inference/dashboard only (no training stack).
+# Do not install requirements.txt on the Pi (it pins macOS TensorFlow).
+tflite-runtime
+numpy
+Pillow
+streamlit
+gpiozero
+evdev
+opencv-python-headless
+requests

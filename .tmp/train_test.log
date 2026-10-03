@@ -1,0 +1,27 @@
+Loading datasets...
+Found 70295 files belonging to 38 classes.
+Found 8777 files belonging to 38 classes.
+Found 8795 files belonging to 38 classes.
+Loaded 38 classes.
+
+Building model...
+No supported GPU was found.
+Traceback (most recent call last):
+  File "/Users/nivashsharma/payirbot-training/src/train.py", line 221, in <module>
+    main(args)
+  File "/Users/nivashsharma/payirbot-training/src/train.py", line 158, in main
+    model, base_model = build_model()
+                        ^^^^^^^^^^^^^
+  File "/Users/nivashsharma/payirbot-training/src/build_model.py", line 31, in build_model
+    base_model = MobileNetV2(
+                 ^^^^^^^^^^^^
+  File "/Users/nivashsharma/payirbot-training/.venv/lib/python3.11/site-packages/keras/applications/mobilenet_v2.py", line 478, in MobileNetV2
+    weights_path = data_utils.get_file(
+                   ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/nivashsharma/payirbot-training/.venv/lib/python3.11/site-packages/keras/utils/data_utils.py", line 277, in get_file
+    _makedirs_exist_ok(datadir)
+  File "/Users/nivashsharma/payirbot-training/.venv/lib/python3.11/site-packages/keras/utils/data_utils.py", line 380, in _makedirs_exist_ok
+    os.makedirs(datadir, exist_ok=True)
+  File "<frozen os>", line 215, in makedirs
+  File "<frozen os>", line 225, in makedirs
+PermissionError: [Errno 1] Operation not permitted: '/tmp/.keras'
